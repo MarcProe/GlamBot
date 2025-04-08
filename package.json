@@ -1,0 +1,25 @@
+{
+  "name": "glambot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "zip": "node archiver.js",
+    "start": "node index.js",
+    "serve": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "lowdb": "^7.0.1",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "ignore": "^7.0.3"
+  }
+}

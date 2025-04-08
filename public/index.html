@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GlamBot File List</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f6f6f6;
+      padding: 2rem;
+    }
+    #email-bar {
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    #email-bar input {
+      flex: 1;
+      padding: 0.4rem 0.6rem;
+      font-size: 1rem;
+    }
+    .file-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    .file-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .email-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .paper-plane {
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      padding: 0.6rem 1rem;
+      font-size: 1.2rem;
+      color: white;
+    }
+    .delete-button {
+      background: #e44;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    video {
+      width: 100%;
+      border-radius: 4px;
+    }
+    .timestamp-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .timestamp {
+      font-size: 0.9rem;
+      color: #888;
+    }
+    .email-address {
+      font-size: 0.9rem;
+      color: #333;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>GlamBot Processed Files</h1>
+
+  <!-- Central Email Input -->
+  <div id="email-bar">
+    <input id="global-email" type="email" placeholder="Enter email address..." />
+  </div>
+
+  <div id="file-list" class="file-list"></div>
+
+  <script>
+    let lastSeen = '';
+
+    async function fetchFiles() {
+      const res = await fetch('/api/files');
+      const files = await res.json();
+
+      const list = document.getElementById('file-list');
+      list.innerHTML = ''; // Clear the list before adding new files
+
+      // Sort files based on original processedAt (newest first)
+      const sortedFiles = files.sort((a, b) => new Date(b.processedAt) - new Date(a.processedAt));
+
+      for (const file of sortedFiles) {
+        const card = document.createElement('div');
+        card.className = 'file-card';
+
+        const video = document.createElement('video');
+        video.src = '/output/' + file.filename;
+        video.controls = true;
+        video.className = 'thumb';
+        video.style.display = 'none'; // Initially hidden
+        video.loop = true; // Loop the video
+
+        const img = document.createElement('img');
+        img.src = '/thumbnails/' + file.thumbnail;
+        img.alt = 'Thumbnail';
+        img.className = 'thumb';
+
+        img.onclick = () => {
+          img.style.display = 'none'; // Hide thumbnail
+          video.style.display = 'block'; // Show video
+          video.currentTime = 1; // Start video at 1 second
+          video.play(); // Start playing video
+        };
+
+        const title = document.createElement('div');
+        title.textContent = file.filename + ' (' + Math.round(file.duration) + 's)';
+
+        // Format timestamp as hh:mm:ss using processedAt
+        const timestamp = new Date(file.processedAt);
+        const formattedTimestamp = timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        const timestampElement = document.createElement('div');
+        timestampElement.className = 'timestamp';
+        timestampElement.textContent = formattedTimestamp;
+
+        // Add email if available
+        const emailElement = document.createElement('div');
+        if (file.email) {
+          emailElement.className = 'email-address';
+          emailElement.textContent = file.email;  // Display email if present
+        }
+
+        const emailRow = document.createElement('div');
+        emailRow.className = 'email-row';
+
+        // Set button color based on email and processed status
+        const actionButton = document.createElement('button');
+        if (!file.email) {
+          actionButton.className = 'paper-plane';
+          actionButton.textContent = '✈'; // Paperplane if no email
+          actionButton.style.backgroundColor = '#2196F3'; // Blue if no email
+        } else if (file.processed === false) {
+          actionButton.className = 'paper-plane';
+          actionButton.textContent = '✈'; // Paperplane if email saved and not processed
+          actionButton.style.backgroundColor = '#FF9B00'; // Yellow if email saved, not processed
+        } else {
+          actionButton.className = 'paper-plane';
+          actionButton.textContent = '✔'; // Checkmark if processed
+          actionButton.style.backgroundColor = '#4CAF50'; // Green if processed
+          actionButton.style.cursor = 'not-allowed';      // Shows the "not allowed" cursor on hover
+          actionButton.disabled = true; // Disable the button
+        }
+
+        // Send email when clicked
+        actionButton.onclick = async () => {
+          const email = document.getElementById('global-email').value;
+          if (email) {
+            await fetch(`/api/update-email/${file.id}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email })
+            });
+            fetchFiles();  // Refresh the file list
+          }
+        };
+
+        // Delete button
+        const del = document.createElement('button');
+        del.className = 'delete-button';
+        del.textContent = '✕';
+        del.onclick = async () => {
+          if (confirm(`Delete ${file.filename}?`)) {
+            await fetch(`/api/delete/${file.id}`, { method: 'DELETE' });
+            fetchFiles();  // Refresh the file list
+          }
+        };
+
+        emailRow.appendChild(actionButton);
+        emailRow.appendChild(del);
+
+        // Add timestamp and email side by side
+        const timestampContainer = document.createElement('div');
+        timestampContainer.className = 'timestamp-container';
+        timestampContainer.appendChild(timestampElement);
+        if (file.email) {
+          timestampContainer.appendChild(emailElement);  // Add email if it exists
+        }
+
+        card.appendChild(img);
+        card.appendChild(video);
+        card.appendChild(title);
+        card.appendChild(timestampContainer);  // Add timestamp container
+        card.appendChild(emailRow);
+
+        list.appendChild(card);
+      }
+    }
+
+    async function checkForChanges() {
+      try {
+        const res = await fetch('/api/last-change');
+        const { lastModified } = await res.json();
+        if (lastModified !== lastSeen) {
+          lastSeen = lastModified;
+          fetchFiles(); // Fetch only the changed/updated files
+        }
+      } catch (err) {
+        console.error('Failed to check update:', err);
+      }
+    }
+
+    fetchFiles(); // Fetch all files on first load
+    setInterval(checkForChanges, 3000); // Check for changes every 3 seconds
+  </script>
+</body>
+</html>

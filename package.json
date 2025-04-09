@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "prc": "node index.js",
+    "srv": "node server.js",
     "zip": "node archiver.js",
     "start": "node index.js",
     "serve": "node server.js"
+
   },
   "keywords": [],
   "author": "",

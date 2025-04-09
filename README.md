@@ -7,8 +7,8 @@
 * `cd GlamBot`
 * run `setup.bat` (will create some folders)
 * run `npm install`
-* create a file named `.env` and fill it
-* put intro and outro in folder `asset`
+* copy `example.env` to `.env` and adjust the configuration options
+* put intro and outro videos in folder `asset`
 * start processor with `npm run prc`
 * start server with `npm run srv`
 * put some file into the configured folder (`E:\video`)

@@ -58,7 +58,7 @@
       align-items: center;
       gap: 0.5rem;
     }
-    .paper-plane {
+    .paper-plane, .reset-button {
       cursor: pointer;
       border: none;
       border-radius: 4px;
@@ -74,6 +74,9 @@
       padding: 0.6rem 1rem;
       cursor: pointer;
       font-size: 1.2rem;
+    }
+    .reset-button {
+      background: #FF5722; /* Orange for the reset button */
     }
     video {
       width: 100%;
@@ -194,6 +197,17 @@
           }
         };
 
+        // Reset button for clearing email and processed status
+        const resetButton = document.createElement('button');
+        resetButton.className = 'reset-button';
+        resetButton.textContent = '🔄'; // Dual curved arrow
+        resetButton.onclick = async () => {
+          if (confirm(`Reset ${file.filename}?`)) {
+            await fetch(`/api/reset-entry/${file.id}`, { method: 'POST' });
+            fetchFiles(); // Refresh the file list
+          }
+        };
+
         // Delete button
         const del = document.createElement('button');
         del.className = 'delete-button';
@@ -206,6 +220,7 @@
         };
 
         emailRow.appendChild(actionButton);
+        emailRow.appendChild(resetButton);  // Add reset button
         emailRow.appendChild(del);
 
         // Add timestamp and email side by side

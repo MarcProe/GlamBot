@@ -79,6 +79,25 @@ app.delete('/api/delete/:id', async (req, res) => {
   }
 });
 
+// POST route to reset an entry (remove email and set processed to false)
+app.post('/api/reset-entry/:id', async (req, res) => {
+  const fileId = req.params.id;
+
+  await db.read();
+  const file = db.data.files.find(f => f.id === fileId);
+
+  if (!file) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+
+  // Reset the email and set processed to false
+  file.email = null;
+  file.processed = null;
+
+  await db.write();
+  res.json({ success: `File ${file.filename} has been reset.` });
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`[Server] Web interface available at http://localhost:${PORT}`);

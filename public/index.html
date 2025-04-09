@@ -14,11 +14,23 @@
       margin-bottom: 1.5rem;
       display: flex;
       gap: 0.5rem;
+      position: relative;
     }
     #email-bar input {
       flex: 1;
       padding: 0.4rem 0.6rem;
       font-size: 1rem;
+    }
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: #888;
+      cursor: pointer;
     }
     .file-list {
       display: grid;
@@ -89,6 +101,7 @@
   <!-- Central Email Input -->
   <div id="email-bar">
     <input id="global-email" type="email" placeholder="Enter email address..." />
+    <button id="clear-email" class="clear-btn" onclick="clearEmailField()">✕</button>
   </div>
 
   <div id="file-list" class="file-list"></div>
@@ -200,7 +213,7 @@
         timestampContainer.className = 'timestamp-container';
         timestampContainer.appendChild(timestampElement);
         if (file.email) {
-          timestampContainer.appendChild(emailElement);  // Add email if it exists
+          timestampContainer.appendChild(emailElement); // Add email if it exists
         }
 
         card.appendChild(img);
@@ -211,6 +224,11 @@
 
         list.appendChild(card);
       }
+    }
+
+    // Clear email input field
+    function clearEmailField() {
+      document.getElementById('global-email').value = '';
     }
 
     async function checkForChanges() {

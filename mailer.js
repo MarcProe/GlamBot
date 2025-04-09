@@ -50,16 +50,6 @@ async function processEntry(entry) {
   // Update the processed status
   entry.processed = true;
   await db.write();
-
-  // Delete the file (but not the thumbnail)
-  const filePath = path.join(process.env.OUTPUT_DIR, entry.filename);
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-    console.log(`Deleted file: ${entry.filename}`);
-  }
-
-  // Don't delete the thumbnail (already handled)
-  // Add any other necessary cleanup here if required
 }
 
 // Main loop to check for unprocessed entries

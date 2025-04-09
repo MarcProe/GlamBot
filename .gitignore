@@ -3,6 +3,7 @@ node_modules/
 *.log
 assets/
 meta/
+input/
 output/
 thumbnails/
 project.zip

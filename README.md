@@ -15,6 +15,7 @@
 * run `git pull`
 * run `npm install`
 * review and adjust the configuration options in `.env`
+* pay close attention if new config options where added to `example.env`
 * start the processes:
   * start processor with `npm run prc` in a separate cmd
   * start webserver with `npm run srv` in a separate cmd
